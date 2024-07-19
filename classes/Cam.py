@@ -21,8 +21,8 @@ class Control():
         return
 
 class CAM():
-    def __init__(self):
-        self.cap = cv2.VideoCapture(1)
+    def __init__(self, cap: int = 0):
+        self.cap = cv2.VideoCapture(cap)
         
         self.color_lines = green
         self.color_square = self.color_lines
