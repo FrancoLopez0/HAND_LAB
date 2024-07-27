@@ -22,11 +22,11 @@ class Control():
 
 class CAM():
     def __init__(self):
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
         
         self.color_lines = green
         self.color_square = self.color_lines
-        self.ShowSquare = False
+        self.show_square = False
 
         if not self.cap.isOpened():
                 print("No se puede abrir la camara")
