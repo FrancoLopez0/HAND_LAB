@@ -59,8 +59,6 @@ class Hands(CAM):
                     y = int(hand_landmarks.landmark[palm_point].y * self.height)
                     #cv2.circle(frame,(x,y), 5, (0, 255, 0), -1)
                     self.coords_points_palm.append([x,y])
-
-            return
         else:
             self.coords_tips = []
             self.coords_base_fingers_points = []
@@ -97,13 +95,14 @@ class Hands(CAM):
 
                     cv2.putText(frame, f"{self.coords2send}", (self.coords_tips[0][0] + 10,self.coords_tips[0][1]) , font, 0.5, green, 2)
 
-                except: return False
+                except Exception: 
+                    return False
                 return True
         return False
 
     def get_palm_centroid(self, frame):
-        prom_x = 0
-        prom_y = 0
+        # prom_x = 0
+        # prom_y = 0
         print(self.coords_points_palm)
         if(self.coords_points_palm != []):
             coords = np.array(self.coords_points_palm)
