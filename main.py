@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
-from classes.Hands import *
+from classes.hands import *
+from classes.cam import Esp32Cam
 
 from time import sleep
 from classes.wifi import WifiManager
@@ -36,10 +37,10 @@ class HandsMain(Hands):
 
 
             if ret:
-                self.frame = self.CamFilter(self.frame_0)
-                self.Update_Fingers_states(self.frame)
-                if(self.Action(self.frame_0) or self.ShowSquare):
-                    self.Draw()
+                self.frame = self.cam_filter(self.frame_0)
+                self.update_fingers_states(self.frame)
+                if(self.check_action(self.frame_0) or self.show_square):
+                    self.draw()
                     # print(self.coords2send)
                     if self.esp_cam:
                         self.esp_cam.send_coords(self.coords2send)

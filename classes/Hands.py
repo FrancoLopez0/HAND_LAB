@@ -1,5 +1,9 @@
-from classes.Cam import *
+# from classes.cam import *
+from classes.cam import CAM, green, red
+import cv2 
+import numpy as np
 import mediapipe as mp
+
 
 class Hands(CAM): 
     def __init__(self, cap: int = 0):
@@ -29,7 +33,7 @@ class Hands(CAM):
 
         self.coords2send = []
 
-    def HandsObtainCoords(self, frame):
+    def hands_obtain_coords(self, frame):
         self.results = self.hands.process(frame)
         if self.results.multi_hand_landmarks is not None:
             
@@ -62,8 +66,8 @@ class Hands(CAM):
             self.coords_base_fingers_points = []
             self.coords_points_palm = []
                          
-    def Update_Fingers_states(self, frame):
-        self.HandsObtainCoords(frame)
+    def update_fingers_states(self, frame):
+        self.hands_obtain_coords(frame)
         if (self.coords_base_fingers_points != []):
             for i in range(len(self.fingertips_points)):
                 if (self.coords_base_fingers_points[i][1] > self.coords_tips[i][1]):
@@ -73,7 +77,7 @@ class Hands(CAM):
                     self.finger_states[i] = 0
         #print(self.finger_states)
 
-    def Action(self, frame):
+    def check_action(self, frame):
         
         if(self.coords_tips != []):
             
@@ -97,7 +101,7 @@ class Hands(CAM):
                 return True
         return False
 
-    def Palm_centroid(self, frame):
+    def get_palm_centroid(self, frame):
         prom_x = 0
         prom_y = 0
         print(self.coords_points_palm)

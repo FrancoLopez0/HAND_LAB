@@ -51,7 +51,7 @@ class CAM():
         
         self.color_lines = green
         self.color_square = self.color_lines
-        self.ShowSquare = False
+        self.show_square = False
 
         if not self.cap.isOpened():
                 print("No se puede abrir la camara")
@@ -61,7 +61,7 @@ class CAM():
         self.w_square = 30
         self.height, self.width = self.frame_0.shape[:2]
 
-    def CamFilter(self, frame):
+    def cam_filter(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         #frame = cv2.GaussianBlur(frame, (5, 5), 0)
@@ -70,21 +70,21 @@ class CAM():
 
         return frame
     
-    def Draw(self):
+    def draw(self):
         
-        self.frame_0 = self.DrawCross(self.frame_0, self.width, self.height, self.color_lines)
-        self.frame_0 = self.DrawSquare(self.frame_0, self.width, self.height, self.color_square)
+        self.frame_0 = self.draw_cross(self.frame_0, self.width, self.height, self.color_lines)
+        self.frame_0 = self.draw_square(self.frame_0, self.width, self.height, self.color_square)
 
         #print(height/2, width/2)
         return
     
-    def DrawCross(self, frame, width, height, color_lines):
+    def draw_cross(self, frame, width, height, color_lines):
         cv2.line(frame, (int(width/2),0), (int(width/2),height),color_lines,1)
         cv2.line(frame, (0,int(height/2)), (width,int(height/2)),color_lines,1)
 
         return frame
     
-    def DrawSquare(self, frame, width, height, color_square):
+    def draw_square(self, frame, width, height, color_square):
         '''
         frame       : image to work
         width       : camera width
