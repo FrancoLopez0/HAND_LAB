@@ -1,46 +1,30 @@
 import cv2
 import mediapipe as mp
 from classes.Hands import *
-import requests
+
 from time import sleep
+from classes.wifi import WifiManager
+wifi_manager = WifiManager()
 program_name = "Handler"
 
 url = 'http://192.168.4.1'
-
-def send_coords(coords):
-    response = requests.get(f'{url}/pos') #abrimos el URL
-    if not response.ok:
-        print("Error al obtener la imagen", response.status_code, response.text)
-        return response.status_code
-    x = int(int(response.json()['move_x']) - coords[0] / 10)
-    y = int(int(response.json()['move_y']) - coords[1] / 5)
-
-    r = requests.post(f'{url}/move', json={
-        "X": x,
-        "Y": y,
-    })
-
-    return r.status_code
-
-def read_cam():
-    response = requests.get(url) #abrimos el URL
-    if not response.ok:
-        print("Error al obtener la imagen", response.status_code, response.text)
-        return False, []
-    img_np = np.array(bytearray(response.content),dtype=np.uint8)
-
-    img = cv2.imdecode(img_np,-1) #decodificamos
-    return img
+wifi_name = 'Esp32 Access point'
 
 def main():
-    HandsMain(esp_cam=False)
+    HandsMain()
 
 class HandsMain(Hands):
-    def __init__(self, esp_cam):
-        super().__init__(cap=0)
-        self.esp_cam = esp_cam
-        self.start()
+    def __init__(self):
+        esp32_object = Esp32Cam() if wifi_manager.is_connected(wifi_name) else None
+        if esp32_object:
+            capture_object = esp32_object
+        else:
+            capture_object = cv2.VideoCapture(0)
     
+        super().__init__(capture_object)
+        self.esp_cam = esp32_object
+        self.start()
+
     def start(self):
         cv2.namedWindow(program_name)
         
@@ -48,10 +32,7 @@ class HandsMain(Hands):
         cv2.setMouseCallback(program_name, self.click_event)
 
         while True:
-            if self.esp_cam:
-                ret, self.frame_0 = read_cam()
-            else: 
-                ret, self.frame_0 = self.cap.read()
+            ret, self.frame_0 = self.cap.read()
 
 
             if ret:
@@ -61,7 +42,7 @@ class HandsMain(Hands):
                     self.Draw()
                     # print(self.coords2send)
                     if self.esp_cam:
-                        send_coords(self.coords2send)
+                        self.esp_cam.send_coords(self.coords2send)
                 self.points_ant = self.p1
             
                 
