@@ -33,6 +33,7 @@ class CAM():
                 exit()
         
         ret,self.frame_0 = self.cap.read()
+        #self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
         self.w_square = 30
         self.height, self.width = self.frame_0.shape[:2]
 

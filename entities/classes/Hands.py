@@ -1,4 +1,4 @@
-from classes.Cam import *
+from entities.classes.Cam import *
 import mediapipe as mp
 
 class Hands(CAM): 
@@ -7,8 +7,8 @@ class Hands(CAM):
 
         self.font = cv2.FONT_HERSHEY_SIMPLEX
 
-        self.long_activate = 70
-        self.long_act = 0
+        self.long_activate = 1
+        self.current_long = 0
 
         self.fingertips_points = [8,12,16,20]
         self.base_fingers_points = [6,10,14,18]
@@ -78,14 +78,15 @@ class Hands(CAM):
                     self.finger_states[i] = 1
                 else :
                     self.finger_states[i] = 0
-        #print(self.finger_states)
+        # print(self.finger_states)
+        # print(self.coords_base_fingers_points)
 
     def Action(self, frame):
         
-        
+
         if(self.coords_tips != [] ):
-            self.long_act = (self.coords_base_fingers_points[0][1]-self.coords_tips[0][1])
-            if ( self.long_act > self.long_activate):
+            self.current_long = (self.coords_base_fingers_points[0][1]-self.coords_tips[0][1])
+            if ( self.current_long > self.long_activate):
             
                 dentro_del_cuadrado =(int(self.width - self.width/2 + self.w_square) > self.coords_tips[0][0]) and (self.coords_tips[0][0] > int(self.width - self.width/2 - self.w_square))
                 dentro_del_cuadrado = dentro_del_cuadrado and (int(self.height - self.height/2 + self.w_square) > self.coords_tips[0][1]) and (self.coords_tips[0][1] > int(self.height - self.height/2 - self.w_square))
@@ -93,13 +94,11 @@ class Hands(CAM):
                     try: 
                         cv2.circle(frame,self.coords_tips[0], 5,red, -1)
                         cv2.line(frame, self.coords_tips[0], (int(self.width/2),int(self.height/2)),red,2)
-                        
-                        
 
                         self.coords2send = [self.coords_tips[0][0] - int(self.width/2), (self.coords_tips[0][1] - int(self.height/2))*(-1)]
 
                         cv2.putText(frame, f"{self.coords2send}", (self.coords_tips[0][0] + 10,self.coords_tips[0][1]) , self.font, 0.5, green, 2)
-                        
+                    
                     #TODO: Send coords to ESP32
                     except: return False
                     return True
