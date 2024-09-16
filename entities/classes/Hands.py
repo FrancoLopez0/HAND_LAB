@@ -6,6 +6,8 @@ class Hands(CAM):
         super().__init__()
 
         self.font = cv2.FONT_HERSHEY_SIMPLEX
+        
+        self.tracking = True
 
         self.long_activate = 1
         self.current_long = 0
@@ -83,7 +85,7 @@ class Hands(CAM):
 
     def Action(self, frame):
         
-        if(self.coords_tips != [] ):
+        if(self.coords_tips != [] and self.tracking):
             self.current_long = (self.coords_base_fingers_points[0][1]-self.coords_tips[0][1])
             if ( self.current_long > self.long_activate):
             

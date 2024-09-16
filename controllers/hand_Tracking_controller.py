@@ -39,6 +39,9 @@ class hand_Tracking_controller(Hands):
         #cv2.createButton("Show grid", self.btn_grid, None, cv2.QT_RADIOBOX, 0)
         #cv2.putText(self.frame_0, self.long_act > self.long_activate if str('Tracking ON') else str('Tracking OFF'), (self.width-300, self.height-50) ,self.font, 1, color= (self.long_act > self.long_activate if green else red), thickness=2)
         cv2.setMouseCallback(program_name + '_0', self.click_event)
+    
+    def set_Tracking(self, bool):
+        self.tracking = bool
 
     def show_grid_command(self, bool):
        self.show_square = bool

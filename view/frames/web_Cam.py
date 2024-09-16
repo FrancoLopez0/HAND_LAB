@@ -55,21 +55,25 @@ class checkboxes(ctk.CTkFrame):
 
         self.web_Cam = webCam
 
-        self.tracking_On = ctk.CTkCheckBox(self, text="Tracking", hover=False)
+        self.var_Tracking = ctk.BooleanVar(value=True)
+        self.tracking_On = ctk.CTkCheckBox(self, text="Tracking", hover=True, command=self.tracking, variable=self.var_Tracking, onvalue=True, offvalue=False)
         self.tracking_On.grid(row=0, column=0, padx=10, pady=10)
 
-        self.var_Show_grid = ctk.BooleanVar(value="off")
+        self.var_Show_grid = ctk.BooleanVar(value=False)
         self.show_Grid = ctk.CTkCheckBox(self, text="Show Grid", hover=False, command=self.show_grid, variable=self.var_Show_grid, onvalue=True, offvalue=False)
         self.show_Grid.grid(row=1, column=0, padx=10, pady=10)
 
-        self.ai_View = ctk.CTkCheckBox(self, text="Ai View", hover=False)
-        self.ai_View.grid(row=0, column=1, padx=10, pady=10)
+        # self.ai_View = ctk.CTkCheckBox(self, text="Ai View", hover=False)
+        # self.ai_View.grid(row=0, column=1, padx=10, pady=10)
 
-        self.filters = ctk.CTkCheckBox(self, text="Filters", hover=False)
-        self.filters.grid(row=1, column=1, padx=10, pady=10)
+        # self.filters = ctk.CTkCheckBox(self, text="Filters", hover=False)
+        # self.filters.grid(row=1, column=1, padx=10, pady=10)
     
-    def show_grid(self, e = None):
+    def show_grid(self):
         cam.show_grid_command(self.var_Show_grid.get())
+    
+    def tracking(self):
+        cam.set_Tracking(self.var_Tracking.get())
 
 class project_Config(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -82,6 +86,7 @@ class project_Config(ctk.CTkFrame):
 
         self.hands_Params = hands_Parameters_config(self)
         self.hands_Params.grid(row=0, column=2)
+
 class web_Cam(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
