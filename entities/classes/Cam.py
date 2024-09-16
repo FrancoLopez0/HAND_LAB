@@ -21,8 +21,9 @@ class Control():
         return
 
 class CAM():
-    def __init__(self):
-        self.cap = cv2.VideoCapture(0)
+    def __init__(self, cam_selected = 0):
+
+        self.cap = cv2.VideoCapture(cam_selected)
         
         self.color_lines = green
         self.color_square = self.color_lines
@@ -36,6 +37,12 @@ class CAM():
         #self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
         self.w_square = 30
         self.height, self.width = self.frame_0.shape[:2]
+
+    def change_Cam(self, choice):
+        #self.__init__(choice)
+        self.cap.release()
+        self.cap = cv2.VideoCapture(choice)
+        ret,self.frame_0 = self.cap.read()
 
     def CamFilter(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

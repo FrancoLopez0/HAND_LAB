@@ -83,7 +83,6 @@ class Hands(CAM):
 
     def Action(self, frame):
         
-
         if(self.coords_tips != [] ):
             self.current_long = (self.coords_base_fingers_points[0][1]-self.coords_tips[0][1])
             if ( self.current_long > self.long_activate):
