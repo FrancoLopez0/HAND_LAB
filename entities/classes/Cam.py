@@ -26,15 +26,22 @@ class CAM():
         
         self.color_lines = green
         self.color_square = self.color_lines
-        self.ShowSquare = False
+        self.show_square = False
 
         if not self.cap.isOpened():
                 print("No se puede abrir la camara")
                 exit()
         
         ret,self.frame_0 = self.cap.read()
+        #self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
         self.w_square = 30
         self.height, self.width = self.frame_0.shape[:2]
+
+    def change_Cam(self, choice):
+        #self.__init__(choice)
+        self.cap.release()
+        self.cap = cv2.VideoCapture(choice)
+        ret,self.frame_0 = self.cap.read()
 
     def CamFilter(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

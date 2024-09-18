@@ -1,9 +1,16 @@
-from classes.Cam import *
+from entities.classes.Cam import *
 import mediapipe as mp
 
 class Hands(CAM): 
     def __init__(self, cap: int = 0):
         super().__init__(cap)
+
+        self.font = cv2.FONT_HERSHEY_SIMPLEX
+        
+        self.tracking = True
+
+        self.long_activate = 1
+        self.current_long = 0
 
         self.fingertips_points = [8,12,16,20]
         self.base_fingers_points = [6,10,14,18]
@@ -13,6 +20,8 @@ class Hands(CAM):
         self.palm_centroid = []
         self.coords_tips = []
         self.finger_states = [0,0,0,0]
+
+        self.dentro_del_cuadrado = None
 
         self.points_ant = []
         self.p1 = []
@@ -25,7 +34,7 @@ class Hands(CAM):
         self.point = self.mp_hands.HandLandmark 
         self.points = None
 
-        self.hands = self.mp_hands.Hands(static_image_mode = False,max_num_hands = 1,min_detection_confidence = 0.75)
+        self.hands = self.mp_hands.Hands(static_image_mode = False,max_num_hands = 2,min_detection_confidence = 0.75)
 
         self.coords2send = []
 
@@ -71,7 +80,8 @@ class Hands(CAM):
                     self.finger_states[i] = 1
                 else :
                     self.finger_states[i] = 0
-        #print(self.finger_states)
+        # print(self.finger_states)
+        # print(self.coords_base_fingers_points)
 
     def Action(self, frame):
         
