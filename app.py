@@ -10,7 +10,7 @@ class App(ctk.CTk):
         self.config()
 
         self.logo = ctk.CTkFrame(self)
-        self.icon = ctk.CTkImage(light_image=Image.open('assets\images\Ara__a_Robotica_vectorized_.png'), dark_image=Image.open('assets\images\Ara__a_Robotica_vectorized_.png'), size=(60,60))
+        self.icon = ctk.CTkImage(light_image=Image.open(r'assets\images\file.png'), dark_image=Image.open(r'assets\images\file.png'), size=(60,60))
         
         self.icon_robotica = ctk.CTkLabel(self.logo, text=" ", image=self.icon)
         self.icon_robotica.grid(row = 0, column = 0)
@@ -30,8 +30,8 @@ class App(ctk.CTk):
         self.project_Config_.bind("<Motion>", self.mouse)
 
         #self.ligth = ctk.StringVar("off")
-        self.switch = ctk.CTkSwitch(self, text="Mode", command=self.Theme_mode)
-        self.switch.pack()
+        # self.switch = ctk.CTkSwitch(self, text="Mode", command=self.Theme_mode)
+        # self.switch.pack()
     
     def mouse(self, e):
         print(e)
@@ -46,7 +46,7 @@ class App(ctk.CTk):
         self.title(program)
 
         self.geometry("1024x700")
-        self._set_appearance_mode("light")
+        self._set_appearance_mode("dark")
 
     def on_closing(self):
         web_Cam.on_closing()

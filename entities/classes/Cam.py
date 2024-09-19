@@ -4,25 +4,73 @@ import cv2
 import math
 import numpy as np
 import time
+import requests
 
 #COLORS
 red = (48,48,248)
 green = (155,239,91)
 
-class Control():
-    def __init__(self):
-        print("Control")
-    
-    def SendDistance(x,y):
+class Esp32Cam():
+    def __init__(self, url: str = 'http://192.168.4.1'):
+        print(f"Init esp32 cam with url: {url}")
+        self.url = url
         
-        print("Distance x: ", x)
-        print("Distance y: ", y)
+        self.set_time(100)
 
+    def isOpened(self):
+        response = requests.get(f'{self.url}/pos') #abrimos el URL
+        return response.ok
+
+    def set_time(self, time: int):
+        try:
+            time = int(time)
+        except (ValueError, TypeError):
+            return False
+        response = requests.post(f'{self.url}/time', json={
+            'time': time
+        })
+
+        print(f'Cambio de tiempos en inicio {response.ok}: {response.text}')
+
+        return response.ok
+
+    def read(self):
+        response = requests.get(self.url) #abrimos el URL
+        if not response.ok:
+            print("Error al obtener la imagen", response.status_code, response.text)
+            return False, []
+        img_np = np.array(bytearray(response.content),dtype=np.uint8)
+
+        img = cv2.imdecode(img_np,-1) #decodificamos
+        return True, img
+
+    def get_cam_position(self):
+        response = requests.get(f'{self.url}/pos') #abrimos el URL
+        if not response.ok:
+            print("Error al obtener la imagen", response.status_code, response.text)
+            return response.status_code
+        servo_pos = response.json()
+        return servo_pos
+
+    def send_coords(self, coords):
+        print(self.get_cam_position())
+        x = int(-coords[0] / 10)
+        y = int(-coords[1] / 5)
+
+        r = requests.post(f'{self.url}/move', json={
+            "X": x,
+            "Y": y,
+        })
+
+        return r.status_code == 200
+    
+    def release(self):
         return
 
 class CAM():
-    def __init__(self, cap: int = 0):
-        self.cap = cv2.VideoCapture(cap)
+
+    def __init__(self, cap):
+        self.cap = cap
         
         self.color_lines = green
         self.color_square = self.color_lines

@@ -7,8 +7,8 @@ from entities.classes.Hands import *
 program_name = "Handler"
 
 class hand_Tracking_controller(Hands):
-    def __init__(self, lbl_video):
-        super().__init__()
+    def __init__(self, lbl_video, cap):
+        super().__init__(cap)
         self.lbl_video = lbl_video
 
     def run(self):
@@ -80,5 +80,7 @@ class hand_Tracking_controller(Hands):
         if(self.Action(self.frame_0) or self.show_square):
             self.Draw()    
 
-#HandsMain(1)
-#App()
+            try:
+                self.cap.send_coords(self.coords2send)
+            except AttributeError:
+                pass

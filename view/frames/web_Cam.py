@@ -2,23 +2,40 @@ from view.frames.my_Frames import *
 from controllers.hand_Tracking_controller import *
 from controllers.video_Cam_controller import *
 from PIL import Image, ImageTk
+from controllers import wifi
 
-cam = hand_Tracking_controller(1)
+# Select cam object
+wifi_name = 'ESP32-Access-Point'
+wifi_manager = wifi.WifiManager()
+
+esp32_object = Esp32Cam() if wifi_manager.is_connected(wifi_name) else None
+
+video_capture = cv2.VideoCapture(0)
+capture_object = esp32_object if esp32_object else video_capture
+
+cam = hand_Tracking_controller(1, cap=video_capture)
+
 class web_Cam_config(ctk.CTkFrame):
     def __init__(self, master, color = "transparent", **kwargs):
         super().__init__(master,width=50, fg_color="transparent", **kwargs)
 
         self.video_ = video()
         cams = self.video_.list_availables_cam()
+        if esp32_object:
+            cams.append("esp_32")
+            print('Cam detected:', esp32_object)
 
         self.choice_Cam = option_Labeled(self, label="Choice Cam", callback=self.choice_Cam_callback, w = 100, values=cams)
-        self.choice_Cam.grid(row = 0, column = 0,padx=20)
+        self.choice_Cam.grid(row = 0, column = 0, padx=20)
 
         self.choice_Com = option_Labeled(self, label="COM", callback=self.choice_Com_callback, w = 100)
         self.choice_Com.grid(row = 1, column = 0, padx=20)
     
     def choice_Cam_callback(self, choice):
-        self.video_.change_cam(cam,choice)
+        if choice == 'esp_32':
+            cam.cap = esp32_object
+        else:
+            cam.cap = video_capture
     
     def choice_Com_callback(self, choice):
         print(choice)
@@ -29,6 +46,12 @@ class hands_Parameters_config(ctk.CTkFrame):
 
         self._bg_color = color
         
+        self.time_movement_label = slider_Labeled(self, "Sample Time", color="transparent", callback=self.set_time_slider,
+        _from_ = 50,
+        _to_ = 150)
+        self.time_movement_label._set_Slider(100)
+        self.time_movement_label.grid(row=3, column=0)
+
         self.distance = slider_Labeled(self, "Distance", color="transparent", callback=self.distance_Slider)
         self.distance._set_Slider(cam.get_distance())
         self.distance.grid(row=1, column=0)
@@ -42,6 +65,12 @@ class hands_Parameters_config(ctk.CTkFrame):
 
     def choice_Cam_callback(self, choice):
         print(choice)
+    
+    def set_time_slider(self, value):
+        try:
+            cam.change_time(value)
+        except AttributeError:
+            pass
 
     def square_Slider(self, value):
         cam.change_Square(value)

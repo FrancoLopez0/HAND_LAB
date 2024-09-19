@@ -1,11 +1,36 @@
 import cv2
 import mediapipe as mp
-from classes.Hands import *
+from entities.classes.Hands import *
 import requests
 from time import sleep
 program_name = "Handler"
 
 url = 'http://192.168.4.1'
+
+def main():
+    # HandsMain(esp_cam=False)
+    y = 0
+    while((x := input('Pos x: ') )!= 'n'):
+        response = requests.get(f'{url}/pos') #abrimos el URL
+        print(response.text)
+        print(int(x))
+        r = requests.post(f'{url}/move', json={
+            "X": int(x),
+            "Y": y,
+        })
+        print(r.text)
+
+    x = 0
+    while((y := input('Pos y: ')) != 'n'):
+        response = requests.get(f'{url}/pos') #abrimos el URL
+        print(response.text)
+        r = requests.post(f'{url}/move', json={
+            "X": x,
+            "Y": int(y),
+        })
+        print(r.text)
+
+
 
 def send_coords(coords):
     response = requests.get(f'{url}/pos') #abrimos el URL
@@ -31,9 +56,6 @@ def read_cam():
 
     img = cv2.imdecode(img_np,-1) #decodificamos
     return img
-
-def main():
-    HandsMain(esp_cam=False)
 
 class HandsMain(Hands):
     def __init__(self, esp_cam):
