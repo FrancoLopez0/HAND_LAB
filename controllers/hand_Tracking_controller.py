@@ -74,6 +74,12 @@ class hand_Tracking_controller(Hands):
     def _program_(self):
         self.frame = self.CamFilter(self.frame_0)
         self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
+
+        for i,state in enumerate(self.finger_states):
+            cv2.circle(self.frame_0, (100+(i*20),50), 3, green if state==1 else red, 3)
+
+        cv2.circle(self.frame_0, (100+(len(self.finger_states)*20),50), 3, green if self.thumb==1 else red, 3)
+            
         #self.frame_0 = imutils.resize(self.frame_0, width=640)
         self.Update_Fingers_states(self.frame)
 

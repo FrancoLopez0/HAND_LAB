@@ -1,6 +1,7 @@
 from entities.classes.Cam import *
 import mediapipe as mp
-
+import numpy
+from math import degrees, acos
 class Hands(CAM): 
     def __init__(self, cap: int = 0):
         super().__init__(cap)
@@ -15,12 +16,14 @@ class Hands(CAM):
         self.fingertips_points = [8,12,16,20]
         self.base_fingers_points = [6,10,14,18]
         self.palm_points = [0,1,5,9,13,17]
+        self.thumb_points = [1,2,4]
+        self.coords_thumb = []
         self.coords_points_palm = []
         self.coords_base_fingers_points = []
         self.palm_centroid = []
         self.coords_tips = []
         self.finger_states = [0,0,0,0]
-
+        self.thumb = 0
         self.dentro_del_cuadrado = None
 
         self.points_ant = []
@@ -40,10 +43,12 @@ class Hands(CAM):
 
     def HandsObtainCoords(self, frame):
         self.results = self.hands.process(frame)
+
         if self.results.multi_hand_landmarks is not None:
             
             self.coords_tips = []
             self.coords_base_fingers_points = []
+            self.coords_thumb = []
 
             for hand_landmarks in self.results.multi_hand_landmarks:        
                 
@@ -65,11 +70,18 @@ class Hands(CAM):
                     #cv2.circle(frame,(x,y), 5, (0, 255, 0), -1)
                     self.coords_points_palm.append([x,y])
 
+                for thumb_point in self.thumb_points:
+                    x = int(hand_landmarks.landmark[thumb_point].x * self.width)
+                    y = int(hand_landmarks.landmark[thumb_point].y * self.height)
+                    # cv2.circle(frame,(x,y), 5, (0, 255, 0), -1)
+                    # print((x,y))
+                    self.coords_thumb.append([x,y])
             return
         else:
             self.coords_tips = []
             self.coords_base_fingers_points = []
             self.coords_points_palm = []
+            self.coords_thumb = []
                          
     def Update_Fingers_states(self, frame):
         self.HandsObtainCoords(frame)
@@ -80,18 +92,34 @@ class Hands(CAM):
                     self.finger_states[i] = 1
                 else :
                     self.finger_states[i] = 0
+        
+        if(len(self.coords_thumb)>=3):
+            p = [np.array(point) for point in self.coords_thumb]
+
+            l1 = np.linalg.norm(p[1]-p[2])
+            l2 = np.linalg.norm(p[0]-p[2])
+            l3 = np.linalg.norm(p[0]-p[1])
+
+            angle = degrees(acos((l1**2 + l3**2 - l2**2) / (2*l1*l3)))
+            
+            self.thumb = 1 if angle>=120 else 0
         # print(self.finger_states)
         # print(self.coords_base_fingers_points)
 
     def Action(self, frame):
         
         if(self.coords_tips != []):
-            
+
             dentro_del_cuadrado =(int(self.width - self.width/2 + self.w_square) > self.coords_tips[0][0]) and (self.coords_tips[0][0] > int(self.width - self.width/2 - self.w_square))
             dentro_del_cuadrado = dentro_del_cuadrado and (int(self.height - self.height/2 + self.w_square) > self.coords_tips[0][1]) and (self.coords_tips[0][1] > int(self.height - self.height/2 - self.w_square))
 
             for coords in self.coords_tips:
                 cv2.circle(frame, coords, 3, green, -1)
+
+            try:
+                for coords in self.coords_thumb:
+                    cv2.circle(frame, coords, 3, green, -1)
+            except: pass  
 
             if( self.finger_states == [1,0,0,0] and not dentro_del_cuadrado):
                 try: 
