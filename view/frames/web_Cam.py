@@ -104,6 +104,8 @@ class checkboxes(ctk.CTkFrame):
     def tracking(self):
         cam.set_Tracking(self.var_Tracking.get())
 
+
+
 class project_Config(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master,fg_color="transparent", **kwargs)
@@ -115,6 +117,17 @@ class project_Config(ctk.CTkFrame):
 
         self.hands_Params = hands_Parameters_config(self)
         self.hands_Params.grid(row=0, column=2)
+
+        self.center = ctk.CTkButton(self, command=self.center_cam)
+        self.center.grid(row=0, column=4)
+        # self.center.onchange()
+
+    def center_cam(self):
+        try:
+            print("Centrado activo")
+            esp32_object.center_image()
+        except:
+            pass
 
 class web_Cam(ctk.CTkFrame):
     def __init__(self, master, **kwargs):

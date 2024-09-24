@@ -34,6 +34,17 @@ class Esp32Cam():
 
         return response.ok
 
+    def center_image(self):
+        position = self.get_cam_position()
+        print(position)
+        r = requests.post(f'{self.url}/move', json={
+            "X": 90 - position[0],
+            "Y": 90 - position[1],
+        })
+        print(r.text)
+        return r.ok
+
+
     def read(self):
         response = requests.get(self.url) #abrimos el URL
         if not response.ok:
