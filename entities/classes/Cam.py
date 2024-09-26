@@ -11,10 +11,18 @@ red = (48,48,248)
 green = (155,239,91)
 
 class Esp32Cam():
-    def __init__(self, url: str = 'http://192.168.4.1', orientation: int = None):
+    def __init__(
+            self, 
+            url: str = 'http://192.168.4.1', 
+            orientation: int = None,
+            x_div: int = 16,
+            y_div: int = 10,
+        ):
         print(f"Init esp32 cam with url: {url}")
         self.url = url
         self.orientation = orientation
+        self.x_div = x_div
+        self.y_div = y_div
         self.set_time(100)
 
     def isOpened(self):
@@ -66,9 +74,9 @@ class Esp32Cam():
         return servo_pos
 
     def send_coords(self, coords):
-        print(self.get_cam_position())
-        x = int(coords[0] / 16)
-        y = int(-coords[1] / 10)
+        print('Actual position:', self.get_cam_position())
+        x = int(coords[0] / self.x_div)
+        y = int(-coords[1] / self.y_div)
 
         r = requests.post(f'{self.url}/move', json={
             "X": x,
