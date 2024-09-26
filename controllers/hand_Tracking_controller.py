@@ -1,15 +1,15 @@
 import cv2
-import mediapipe as mp
-from PIL import Image as Img
-from PIL import ImageTk
-from entities.classes.Hands import *
+from entities.classes.Hands import Hands, red, green
+import time 
 
 program_name = "Handler"
 
-class hand_Tracking_controller(Hands):
+class HandTrackingController(Hands):
     def __init__(self, lbl_video, cap):
         super().__init__(cap)
         self.lbl_video = lbl_video
+        self.last_action = 0
+        self.center_action = 0
 
     def run(self):
         while True:
@@ -83,10 +83,24 @@ class hand_Tracking_controller(Hands):
         #self.frame_0 = imutils.resize(self.frame_0, width=640)
         self.Update_Fingers_states(self.frame)
 
-        if(self.Action(self.frame_0) or self.show_square):
-            self.Draw()    
-
+        if self.detect_f3_fingers_down() and time.time() > self.last_action:
+            self.last_action = time.time() + 1 # now + 1s
             try:
-                self.cap.send_coords(self.coords2send)
+                self.cap.center_image()
+            except AttributeError as e:
+                print("Error in center image:", e)
+
+        elif(self.Action(self.frame_0) or self.show_square):
+            self.Draw()    
+            if time.time() > self.last_action:
+                try:
+                    self.cap.send_coords(self.coords2send)
+                    self.last_action = time.time() + 50 / 1000 # now + 200mS
+                except AttributeError:
+                    pass
+        elif time.time() < self.last_action:
+            try:
+                self.cap.send_coords([0, 0]) # Finish action
             except AttributeError:
                 pass
+            

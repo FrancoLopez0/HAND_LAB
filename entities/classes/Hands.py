@@ -92,17 +92,19 @@ class Hands(CAM):
                     self.finger_states[i] = 1
                 else :
                     self.finger_states[i] = 0
-        
-        if(len(self.coords_thumb)>=3):
-            p = [np.array(point) for point in self.coords_thumb]
+        try:
+            if(len(self.coords_thumb)>=3):
+                p = [np.array(point) for point in self.coords_thumb]
 
-            l1 = np.linalg.norm(p[1]-p[2])
-            l2 = np.linalg.norm(p[0]-p[2])
-            l3 = np.linalg.norm(p[0]-p[1])
+                l1 = np.linalg.norm(p[1]-p[2])
+                l2 = np.linalg.norm(p[0]-p[2])
+                l3 = np.linalg.norm(p[0]-p[1])
 
-            angle = degrees(acos((l1**2 + l3**2 - l2**2) / (2*l1*l3)))
-            
-            self.thumb = 1 if angle>=120 else 0
+                angle = degrees(acos((l1**2 + l3**2 - l2**2) / (2*l1*l3)))
+                
+                self.thumb = 1 if angle>=120 else 0
+        except Exception as e:
+            print('Error in thumb:', e)
         # print(self.finger_states)
         # print(self.coords_base_fingers_points)
 
@@ -133,6 +135,12 @@ class Hands(CAM):
 
                 except: return False
                 return True
+        return False
+
+    def detect_f3_fingers_down(self):
+        
+        if self.coords_tips and self.finger_states == [1,1,0,0] and self.thumb:
+            return True
         return False
 
     def Palm_centroid(self, frame):

@@ -29,6 +29,6 @@ class video:
         availables_cam = [str(x) for x in availables_cam]
         return availables_cam
     
-    def change_cam(self, object:Hands,cam):
+    def change_cam(self, object:Hands, cam):
         object.change_Cam(cam)
         

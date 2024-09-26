@@ -1,16 +1,12 @@
 import cv2
-#from pyzbar.pyzbar import decode
-#from PIL import Image
-import math
 import numpy as np
-import time
 import requests
 
 #COLORS
 red = (48,48,248)
 green = (155,239,91)
 
-class Esp32Cam():
+class Esp32Cam:
     def __init__(
             self, 
             url: str = 'http://192.168.4.1', 
@@ -18,6 +14,12 @@ class Esp32Cam():
             x_div: int = 16,
             y_div: int = 10,
         ):
+        """
+        orientation: 
+            0       -> x-axis 
+            n >= 1  -> y-axis
+            n <= -1 -> both axes
+        """
         print(f"Init esp32 cam with url: {url}")
         self.url = url
         self.orientation = orientation

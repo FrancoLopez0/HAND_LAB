@@ -1,6 +1,13 @@
-from view.frames.my_Frames import *
-from controllers.hand_Tracking_controller import *
-from controllers.video_Cam_controller import *
+import cv2
+
+from view.frames.my_Frames import option_Labeled, slider_Labeled
+import customtkinter as ctk
+
+from controllers.hand_Tracking_controller import HandTrackingController
+from controllers.video_Cam_controller import video
+
+from entities.classes.Cam import Esp32Cam
+
 from PIL import Image, ImageTk
 from controllers import wifi
 
@@ -13,7 +20,7 @@ esp32_object = Esp32Cam(orientation=0) if wifi_manager.is_connected(wifi_name) e
 video_capture = cv2.VideoCapture(0)
 capture_object = esp32_object if esp32_object else video_capture
 
-cam = hand_Tracking_controller(1, cap=video_capture)
+cam = HandTrackingController(1, cap=video_capture)
 
 class web_Cam_config(ctk.CTkFrame):
     def __init__(self, master, color = "transparent", **kwargs):
@@ -79,7 +86,7 @@ class hands_Parameters_config(ctk.CTkFrame):
         cam.change_Distance(value)
 
 class checkboxes(ctk.CTkFrame):
-    def __init__(self, master, webCam:hand_Tracking_controller = None, **kwargs):
+    def __init__(self, master, webCam: HandTrackingController = None, **kwargs):
         super().__init__(master,fg_color="transparent", **kwargs)
 
         self.web_Cam = webCam
