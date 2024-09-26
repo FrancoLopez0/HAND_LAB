@@ -8,7 +8,7 @@ from controllers import wifi
 wifi_name = 'ESP32-Access-Point'
 wifi_manager = wifi.WifiManager()
 
-esp32_object = Esp32Cam() if wifi_manager.is_connected(wifi_name) else None
+esp32_object = Esp32Cam(orientation=0) if wifi_manager.is_connected(wifi_name) else None
 
 video_capture = cv2.VideoCapture(0)
 capture_object = esp32_object if esp32_object else video_capture

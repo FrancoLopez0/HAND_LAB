@@ -11,10 +11,10 @@ red = (48,48,248)
 green = (155,239,91)
 
 class Esp32Cam():
-    def __init__(self, url: str = 'http://192.168.4.1'):
+    def __init__(self, url: str = 'http://192.168.4.1', orientation: int = None):
         print(f"Init esp32 cam with url: {url}")
         self.url = url
-        
+        self.orientation = orientation
         self.set_time(100)
 
     def isOpened(self):
@@ -53,6 +53,8 @@ class Esp32Cam():
         img_np = np.array(bytearray(response.content),dtype=np.uint8)
 
         img = cv2.imdecode(img_np,-1) #decodificamos
+        if self.orientation:
+            img = cv2.flip(img, self.orientation)
         return True, img
 
     def get_cam_position(self):
@@ -65,8 +67,8 @@ class Esp32Cam():
 
     def send_coords(self, coords):
         print(self.get_cam_position())
-        x = int(-coords[0] / 10)
-        y = int(-coords[1] / 5)
+        x = int(coords[0] / 16)
+        y = int(-coords[1] / 10)
 
         r = requests.post(f'{self.url}/move', json={
             "X": x,
