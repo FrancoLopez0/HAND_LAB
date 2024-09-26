@@ -102,7 +102,7 @@ class Hands(CAM):
 
                 angle = degrees(acos((l1**2 + l3**2 - l2**2) / (2*l1*l3)))
                 
-                self.thumb = 1 if angle>=120 else 0
+                self.thumb = 1 if angle>=130 else 0
         except Exception as e:
             print('Error in thumb:', e)
         # print(self.finger_states)
