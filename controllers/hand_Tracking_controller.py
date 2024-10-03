@@ -1,15 +1,26 @@
 import cv2
 from entities.classes.Hands import Hands, red, green
 import time 
+from entities.classes.ContinousTimer import ContinousTimer
+import requests
 
 program_name = "Handler"
 
+def test():
+    print("Hola")
 class HandTrackingController(Hands):
     def __init__(self, lbl_video, cap):
         super().__init__(cap)
         self.lbl_video = lbl_video
         self.last_action = 0
         self.center_action = 0
+
+        self.sendFingers = ContinousTimer(interval=1, function=self.sendFingerStates)
+        try:
+            self.sendFingers.run()
+        except KeyboardInterrupt:
+            # Cancel Timer
+            self.sendFingers.timer.cancel()
 
     def run(self):
         while True:
@@ -22,6 +33,9 @@ class HandTrackingController(Hands):
                 break
             cv2.imshow(program_name+'_0', self.frame_0)
             cv2.imshow(program_name, self.frame)
+
+
+
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -74,6 +88,7 @@ class HandTrackingController(Hands):
     def _program_(self):
         self.frame = self.CamFilter(self.frame_0)
         self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
+        print(self.finger_states, self.ant_states)
 
         for i,state in enumerate(self.finger_states):
             cv2.circle(self.frame_0, (100+(i*20),50), 3, green if state==1 else red, 3)

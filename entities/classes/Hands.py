@@ -1,6 +1,7 @@
 from entities.classes.Cam import *
 import mediapipe as mp
 import numpy
+import requests
 from math import degrees, acos
 class Hands(CAM): 
     def __init__(self, cap: int = 0):
@@ -25,6 +26,7 @@ class Hands(CAM):
         self.finger_states = [0,0,0,0]
         self.thumb = 0
         self.dentro_del_cuadrado = None
+        self.ant_states = self.finger_states
 
         self.points_ant = []
         self.p1 = []
@@ -108,9 +110,20 @@ class Hands(CAM):
         # print(self.finger_states)
         # print(self.coords_base_fingers_points)
 
+    def sendFingerStates(self):
+        if(self.coords_tips != []): #If hand has detected
+            url = "http://192.168.1.1"
+            params = {
+                'index': 'up' if self.finger_states[0] == 1 else 'down'
+            }
+            print(f'send {params}')
+            r = requests.get(url, params)
+            print(params)
+
     def Action(self, frame):
         
-        if(self.coords_tips != []):
+        if(self.coords_tips != []): #If hand has detected
+            
 
             dentro_del_cuadrado =(int(self.width - self.width/2 + self.w_square) > self.coords_tips[0][0]) and (self.coords_tips[0][0] > int(self.width - self.width/2 - self.w_square))
             dentro_del_cuadrado = dentro_del_cuadrado and (int(self.height - self.height/2 + self.w_square) > self.coords_tips[0][1]) and (self.coords_tips[0][1] > int(self.height - self.height/2 - self.w_square))
@@ -123,6 +136,7 @@ class Hands(CAM):
                     cv2.circle(frame, coords, 3, green, -1)
             except: pass  
 
+
             if( self.finger_states == [1,0,0,0] and not dentro_del_cuadrado):
                 try: 
                     cv2.circle(frame, self.coords_tips[0], 5, red, -1)
@@ -132,9 +146,13 @@ class Hands(CAM):
                     self.coords2send = [self.coords_tips[0][0] - int(self.width/2), (self.coords_tips[0][1] - int(self.height/2))*(-1)]
 
                     cv2.putText(frame, f"{self.coords2send}", (self.coords_tips[0][0] + 10,self.coords_tips[0][1]) , font, 0.5, green, 2)
+                    self.ant_states = self.finger_states
 
-                except: return False
+                except: 
+                    self.ant_states = self.finger_states
+                    return False
                 return True
+            self.ant_states = self.finger_states
         return False
 
     def detect_f3_fingers_down(self):
