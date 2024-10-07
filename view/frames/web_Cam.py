@@ -125,7 +125,7 @@ class project_Config(ctk.CTkFrame):
         self.hands_Params = hands_Parameters_config(self)
         self.hands_Params.grid(row=0, column=2)
 
-        self.center = ctk.CTkButton(self, command=self.center_cam)
+        self.center = ctk.CTkButton(self, command=self.center_cam, text="CENTER")
         self.center.grid(row=0, column=4)
         # self.center.onchange()
 
@@ -170,4 +170,4 @@ class web_Cam(ctk.CTkFrame):
     
     def on_closing(self):
         cam.cap.release()
-
+        cam.sendFingers.timer.cancel()

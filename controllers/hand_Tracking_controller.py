@@ -6,8 +6,6 @@ import requests
 
 program_name = "Handler"
 
-def test():
-    print("Hola")
 class HandTrackingController(Hands):
     def __init__(self, lbl_video, cap):
         super().__init__(cap)
@@ -15,7 +13,7 @@ class HandTrackingController(Hands):
         self.last_action = 0
         self.center_action = 0
 
-        self.sendFingers = ContinousTimer(interval=1, function=self.sendFingerStates)
+        self.sendFingers = ContinousTimer(interval=0.5, function=self.sendFingerStates)
         try:
             self.sendFingers.run()
         except KeyboardInterrupt:
@@ -33,9 +31,6 @@ class HandTrackingController(Hands):
                 break
             cv2.imshow(program_name+'_0', self.frame_0)
             cv2.imshow(program_name, self.frame)
-
-
-
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -53,7 +48,9 @@ class HandTrackingController(Hands):
         #cv2.createButton("Show grid", self.btn_grid, None, cv2.QT_RADIOBOX, 0)
         #cv2.putText(self.frame_0, self.long_act > self.long_activate if str('Tracking ON') else str('Tracking OFF'), (self.width-300, self.height-50) ,self.font, 1, color= (self.long_act > self.long_activate if green else red), thickness=2)
         cv2.setMouseCallback(program_name + '_0', self.click_event)
-    
+    def __del__(self):
+        self.sendFingers.timer.cancel()
+
     def set_Tracking(self, bool):
         self.tracking = bool
 
@@ -88,7 +85,7 @@ class HandTrackingController(Hands):
     def _program_(self):
         self.frame = self.CamFilter(self.frame_0)
         self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
-        print(self.finger_states, self.ant_states)
+        # print(self.finger_states, self.ant_states)
 
         for i,state in enumerate(self.finger_states):
             cv2.circle(self.frame_0, (100+(i*20),50), 3, green if state==1 else red, 3)

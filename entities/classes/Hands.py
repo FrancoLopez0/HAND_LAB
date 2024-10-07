@@ -26,7 +26,7 @@ class Hands(CAM):
         self.finger_states = [0,0,0,0]
         self.thumb = 0
         self.dentro_del_cuadrado = None
-        self.ant_states = self.finger_states
+        self.ant_states = [1,1,1,1]
 
         self.points_ant = []
         self.p1 = []
@@ -39,7 +39,7 @@ class Hands(CAM):
         self.point = self.mp_hands.HandLandmark 
         self.points = None
 
-        self.hands = self.mp_hands.Hands(static_image_mode = False,max_num_hands = 2,min_detection_confidence = 0.75)
+        self.hands = self.mp_hands.Hands(static_image_mode = False,max_num_hands = 1,min_detection_confidence = 0.75)
 
         self.coords2send = []
 
@@ -111,18 +111,24 @@ class Hands(CAM):
         # print(self.coords_base_fingers_points)
 
     def sendFingerStates(self):
-        if(self.coords_tips != []): #If hand has detected
-            url = "http://192.168.1.1"
-            params = {
-                'index': 'up' if self.finger_states[0] == 1 else 'down'
-            }
-            print(f'send {params}')
-            r = requests.get(url, params)
-            print(params)
+        if(self.coords_tips != [] ): #If hand has detected
+            try:
+                url = "http://192.168.1.1"
+                params = {
+                    'thumb': 'up' if self.thumb == 1 else 'down',
+                    'index': 'up' if self.finger_states[0] == 1 else 'down',
+                    'middle': 'up' if self.finger_states[1] == 1 else 'down',
+                    'ring': 'up' if self.finger_states[2] == 1 else 'down',
+                    'pinky': 'up' if self.finger_states[3] == 1 else 'down',
+                }
+                print(f'send {params}')
+                r = requests.get(url, params)
+            except:
+                print("Error")
 
     def Action(self, frame):
         
-        if(self.coords_tips != []): #If hand has detected
+        if(self.coords_tips != [] and self.long_activate): #If hand has detected
             
 
             dentro_del_cuadrado =(int(self.width - self.width/2 + self.w_square) > self.coords_tips[0][0]) and (self.coords_tips[0][0] > int(self.width - self.width/2 - self.w_square))
@@ -137,7 +143,7 @@ class Hands(CAM):
             except: pass  
 
 
-            if( self.finger_states == [1,0,0,0] and not dentro_del_cuadrado):
+            if( self.finger_states == [1,0,0,0] and not dentro_del_cuadrado and self.tracking):
                 try: 
                     cv2.circle(frame, self.coords_tips[0], 5, red, -1)
                     cv2.line(frame, self.coords_tips[0], (int(self.width/2),int(self.height/2)),red,2)
@@ -146,13 +152,11 @@ class Hands(CAM):
                     self.coords2send = [self.coords_tips[0][0] - int(self.width/2), (self.coords_tips[0][1] - int(self.height/2))*(-1)]
 
                     cv2.putText(frame, f"{self.coords2send}", (self.coords_tips[0][0] + 10,self.coords_tips[0][1]) , font, 0.5, green, 2)
-                    self.ant_states = self.finger_states
 
                 except: 
-                    self.ant_states = self.finger_states
                     return False
                 return True
-            self.ant_states = self.finger_states
+            # self.ant_states = self.finger_states
         return False
 
     def detect_f3_fingers_down(self):
