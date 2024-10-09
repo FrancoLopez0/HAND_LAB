@@ -93,6 +93,8 @@ class HandTrackingController(Hands):
         self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
         # print(self.finger_states, self.ant_states)
 
+        cv2.rectangle(self.frame_0, (90, 40), (190, 130), (0, 0, 0), -1)
+
         for i, state in enumerate(self.finger_states):
             cv2.circle(self.frame_0, (100+(i*20), 50), 3,
                        green if state == 1 else red, 3)
