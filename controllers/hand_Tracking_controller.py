@@ -1,10 +1,11 @@
 import cv2
 from entities.classes.Hands import Hands, red, green
-import time 
+import time
 from entities.classes.ContinousTimer import ContinousTimer
 import requests
 
 program_name = "Handler"
+
 
 class HandTrackingController(Hands):
     def __init__(self, lbl_video, cap):
@@ -12,8 +13,10 @@ class HandTrackingController(Hands):
         self.lbl_video = lbl_video
         self.last_action = 0
         self.center_action = 0
+        self.tracking = False
 
-        self.sendFingers = ContinousTimer(interval=0.5, function=self.sendFingerStates)
+        self.sendFingers = ContinousTimer(
+            interval=0.1, function=self.sendFingerStates)
         try:
             self.sendFingers.run()
         except KeyboardInterrupt:
@@ -31,10 +34,10 @@ class HandTrackingController(Hands):
                 break
             cv2.imshow(program_name+'_0', self.frame_0)
             cv2.imshow(program_name, self.frame)
-            
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-        
+
         self.cap.release()
         cv2.destroyAllWindows()
 
@@ -42,12 +45,15 @@ class HandTrackingController(Hands):
         cv2.namedWindow(program_name)
         cv2.namedWindow(program_name + '_0')
         cv2.namedWindow(program_name + ' config')
-        
-        cv2.createTrackbar('Square', program_name + ' config', self.w_square, 100, self.on_change_square)
-        cv2.createTrackbar('Max distance', program_name + ' config', int(self.long_activate * (100/self.height)), 100, self.on_change_distance)
-        #cv2.createButton("Show grid", self.btn_grid, None, cv2.QT_RADIOBOX, 0)
-        #cv2.putText(self.frame_0, self.long_act > self.long_activate if str('Tracking ON') else str('Tracking OFF'), (self.width-300, self.height-50) ,self.font, 1, color= (self.long_act > self.long_activate if green else red), thickness=2)
+
+        cv2.createTrackbar('Square', program_name + ' config',
+                           self.w_square, 100, self.on_change_square)
+        cv2.createTrackbar('Max distance', program_name + ' config', int(
+            self.long_activate * (100/self.height)), 100, self.on_change_distance)
+        # cv2.createButton("Show grid", self.btn_grid, None, cv2.QT_RADIOBOX, 0)
+        # cv2.putText(self.frame_0, self.long_act > self.long_activate if str('Tracking ON') else str('Tracking OFF'), (self.width-300, self.height-50) ,self.font, 1, color= (self.long_act > self.long_activate if green else red), thickness=2)
         cv2.setMouseCallback(program_name + '_0', self.click_event)
+
     def __del__(self):
         self.sendFingers.timer.cancel()
 
@@ -55,13 +61,13 @@ class HandTrackingController(Hands):
         self.tracking = bool
 
     def show_grid_command(self, bool):
-       self.show_square = bool
+        self.show_square = bool
 
     def change_Square(self, value):
         self.w_square = value
-    
+
     def change_Distance(self, value):
-        self.long_activate = int((100-value) * self.height/100 * 0.3) 
+        self.long_activate = int((100-value) * self.height/100 * 0.3)
 
     def get_Square(self):
         return self.w_square
@@ -72,47 +78,71 @@ class HandTrackingController(Hands):
     def btn_grid(self, *args):
         self.show_square = not self.show_square
 
-    def on_change_square(self,val):
+    def on_change_square(self, val):
         self.w_square = val
-    
+
     def on_change_distance(self, val):
-        self.long_activate = int((100-val) * self.height/100 * 0.3) 
-    
-    def click_event(self,event, x, y, flags, param):
+        self.long_activate = int((100-val) * self.height/100 * 0.3)
+
+    def click_event(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.show_square = not self.show_square
-    
+
     def _program_(self):
         self.frame = self.CamFilter(self.frame_0)
         self.frame_0 = cv2.cvtColor(self.frame_0, cv2.COLOR_BGR2RGB)
         # print(self.finger_states, self.ant_states)
 
-        for i,state in enumerate(self.finger_states):
-            cv2.circle(self.frame_0, (100+(i*20),50), 3, green if state==1 else red, 3)
+        for i, state in enumerate(self.finger_states):
+            cv2.circle(self.frame_0, (100+(i*20), 50), 3,
+                       green if state == 1 else red, 3)
 
-        cv2.circle(self.frame_0, (100+(len(self.finger_states)*20),50), 3, green if self.thumb==1 else red, 3)
-            
-        #self.frame_0 = imutils.resize(self.frame_0, width=640)
+        try:
+            for i, value in enumerate(self.norm):
+                cv2.line(self.frame_0, (100+(i*20), 120),
+                         (100+(i*20), int(120 - 50 * value)), green, 6)
+        except:
+            pass
+
+        cv2.circle(self.frame_0, (100+(len(self.finger_states)*20),
+                   50), 3, green if self.thumb == 1 else red, 3)
+
+        cv2.line(self.frame_0, (100+(len(self.norm)*20), 120),
+                 (100+(len(self.norm)*20), int(120 - 50 * self.norm_thumb)), green, 6)
+
+        cv2.line(self.frame_0, (100, 120),
+                 (100+(len(self.norm)*20), 120), red, 6)
+
+        min = 130
+        cv2.line(self.frame_0, (min, 120),
+                 (int(min + len(self.norm) * 5), 120), green, 3)
+
+        val = int(min + len(self.norm) * 5 * (self.current_long-self.min_long_activate) /
+                  (self.max_long_activate-self.min_long_activate))
+
+        cv2.circle(self.frame_0, ((val if val > 100 else 100) if val <
+                   180 else 180, 120), 3, green, 3)
+
+        # self.frame_0 = imutils.resize(self.frame_0, width=640)
         self.Update_Fingers_states(self.frame)
 
         if self.detect_f3_fingers_down() and time.time() > self.last_action:
-            self.last_action = time.time() + 1 # now + 1s
+            self.last_action = time.time() + 1  # now + 1s
             try:
                 self.cap.center_image()
             except AttributeError as e:
                 print("Error in center image:", e)
 
-        elif(self.Action(self.frame_0) or self.show_square):
-            self.Draw()    
+        elif (self.Action(self.frame_0) or self.show_square):
+            self.Draw()
             if time.time() > self.last_action:
                 try:
                     self.cap.send_coords(self.coords2send)
-                    self.last_action = time.time() + 50 / 1000 # now + 200mS
+                    self.last_action = time.time() + 50 / 1000  # now + 200mS
                 except AttributeError:
                     pass
         elif time.time() < self.last_action:
             try:
-                self.cap.send_coords([0, 0]) # Finish action
+                self.cap.send_coords([0, 0])  # Finish action
             except AttributeError:
                 pass
-            
